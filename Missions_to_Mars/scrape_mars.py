@@ -75,9 +75,16 @@ for result in results:
 
 def scrape():
     init_browser()
+    items = {"Title:":[], "Summary:":[], "Table:":[], "Photo:":[]}
     scrape_title()
     scrape_table()
     scrape_imgs(result)
+    items["Title:"] = items["Title:"].append(news_title)
+    items["Summary:"]= items["Summary:"].append(news_p)
+    items["Table:"] = items["Table:"].append(table)
+    items["Photo:"] = items["Photo:"].append(hemisphere_image_urls)
+
+    return items
 
 
 
