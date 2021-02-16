@@ -20,10 +20,30 @@
   <!-- Latest Mars News -->
     <div class="row" id="mars-items">
       <div class="col-md-12">
-        <h4 class="heading">{{items.Title}} {{items.Summary}} {{items.Photo}}</h4>
-        <small>{{items.Table}}</small>
+        <h4 class="heading">{{items.Title}}{{items.Photo}}</h4>
+        <small>{{items.Summary}}</small>
+      </div>
+    </div>  
+    <div class="row">
+      <div class="column">
+        <img src="/Users/laurelwilliamson/Downloads/cerberus_enhanced.jpg">
+      </div>
+      <div class="column">
+        <img src="/Users/laurelwilliamson/Downloads/schiaparelli_enhanced.jpg">
+      </div>
+      <div class="column">
+        <img src="/Users/laurelwilliamson/Downloads/syrtis_major_enhanced.jpg">
+      </div>
+      <div class="column">
+        <img src="/Users/laurelwilliamson/Downloads/valles_marineris_enhanced.jpg">
       </div>
     </div>
+    <table class="table table-striped table-dark">
+      <thead>
+        <tr>{{items.Table}} </tr>
+      </tbody>
+    </table>
+    
 
   </div>
 </body>

@@ -13,78 +13,77 @@ def init_browser():
     executable_path = {"executable_path": "/Users/laurelwilliamson/Downloads/chromedriver 2"}
     return Browser("chrome", **executable_path, headless=True)
 
-#Scrape the NASA Mars News Site and collect the latest News Title and Paragraph Text. Assign the text to variables that you can reference later.
-def scrape_title():
-    browser = init_browser()
-    news_title = {}
-    news_p = {}
-
-    url = "https://mars.nasa.gov/news/?page=0&per_page=40&order=publish_date+desc%2Ccreated_at+desc&search=&category=19%2C165%2C184%2C204&blank_scope=Latest"
-    browser.visit(url)
-
-    html = browser.html
-    soup = bs(html, "html.parser")
-    
-    slide_elem = soup.select_one('ul.item_list li.slide')
-    news_title = slide_elem.find("div", class_='content_title').get_text()
-    news_p = soup.find("div", class_="article_teaser_body").get_text()
-
-    return news_title, news_p
-
-#PANDAS setup
-def scrape_table():
-    url = "https://space-facts.com/mars/"
-    tables = pd.read_html(url)
-    df = tables[0]
-    html_table = df.to_html()
-    html_table.replace('\n', '')
-    table = df.to_html('table.html')
-    return table
-
-browser = init_browser()
-html = browser.html
-soup = bs(html, "html.parser")
-hemisphere_image_urls = {"title":[], "url":[]}
-results = soup.find_all('div', class_='item')
-
-def scrape_imgs(result):
-        browser = init_browser()
-        title = {}
-        img_url = {}
-    
-        url = "https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
-        browser.visit(url)
-
-        html = browser.html
-        soup = bs(html, "html.parser")
-    
-        contained = result.find("div", class_='collapsible results')
-        contents = result.find("div", class_='item')
-        img_url = result.img['src']
-        title = result.find("h3").get_text()
-        
-        
-        hemisphere_image_urls["title"].append(title)
-        hemisphere_image_urls["url"].append(img_url)
-        
-        
-        return title, img_url
-
-for result in results:
-    scrape_imgs(result)
-
 def scrape():
-    init_browser()
-    items = {"Title:":[], "Summary:":[], "Table:":[], "Photo:":[]}
-    scrape_title()
-    scrape_table()
-    scrape_imgs(result)
-    items["Title:"] = items["Title:"].append(news_title)
-    items["Summary:"]= items["Summary:"].append(news_p)
-    items["Table:"] = items["Table:"].append(table)
-    items["Photo:"] = items["Photo:"].append(hemisphere_image_urls)
 
-    return items
+    browser = init_browser()
+    
 
+    #define urls
+    news_url = "https://mars.nasa.gov/news/?page=0&per_page=40&order=publish_date+desc%2Ccreated_at+desc&search=&category=19%2C165%2C184%2C204&blank_scope=Latest"
+    table_url = "https://space-facts.com/mars/"
+    images_url = "https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
 
+    browser.visit(news_url)
+    html = browser.html
+    soup = bs(html, 'html.parser')
 
+    recent = None
+
+    
+
+    recent = soup.find('li', class_='slide')
+
+    if recent is None:
+        news_info = {
+            'n_Title': "Cannot find anything",
+            'n_Summary': "Uh oh."
+        }
+    else:
+        news_title = recent.h3.text
+
+        news_p = recent.find('div', class_='rollover_description_inner').text
+
+        mars_info = {
+            "n_Title": news_title,
+            'n_Summary': news_p
+        }
+
+#Images
+    mars_info = {"n_Title", "n_Summary"}
+    pic_titles = []
+    photo_info = []
+    results = soup.find_all('div', class_='item')
+
+    for result in results:
+        title = result.find("h3").text
+        pic_titles.append(title)
+
+    for title in pic_titles:
+
+        browser.links.find_by_partial_text(title).click()
+        next_html = browser.html
+        next_soup = BeautifulSoup(next_html, 'html.parser')
+        pic = next_soup.find_all('div', class_='downloads')[0].li.a['href']
+        half = next_soup.find('h2', class_='title').text
+        photo_info.append({'title':half, 'img_url':pic})
+        browser.visit(images_url)
+
+    mars_info.update({
+        "i_Title":photo_info[title],
+        "i_URL":photo_info[img_url]
+    })
+
+    browser.quit()
+
+#Fact Table
+
+    tables = pd.read_html(table_url)
+    df = tables[0]
+    df=df.rename(columns={0:'',1:'Mars'})
+    table = df.to_html(index=False,classes='table table-striped', justify='left')  
+    
+    mars_info.update({
+       "mars_table":table
+        })
+
+    return mars_info
