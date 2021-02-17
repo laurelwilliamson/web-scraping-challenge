@@ -27,7 +27,7 @@ def scrape():
     html = browser.html
     soup = bs(html, 'html.parser')
 
-    recent = None
+    #recent = None
 
     
 
