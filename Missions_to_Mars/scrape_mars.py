@@ -33,8 +33,10 @@ def scrape():
 
     recent = soup.find('li', class_='slide')
 
+    mars_info = {}
+
     if recent is None:
-        news_info = {
+        mars_info = {
             'n_Title': "Cannot find anything",
             'n_Summary': "Uh oh."
         }
@@ -49,31 +51,35 @@ def scrape():
         }
 
 #Images
-    mars_info = {"n_Title", "n_Summary"}
+    browser.visit(images_url)
+    html = browser.html
+    soup = bs(html, 'html.parser')
+
     pic_titles = []
-    photo_info = []
+    photo_info = {}
     results = soup.find_all('div', class_='item')
 
     for result in results:
         title = result.find("h3").text
         pic_titles.append(title)
 
+
+    mars_info["images"] = {}
     for title in pic_titles:
 
         browser.links.find_by_partial_text(title).click()
         next_html = browser.html
-        next_soup = BeautifulSoup(next_html, 'html.parser')
+        next_soup = bs(next_html, 'html.parser')
         pic = next_soup.find_all('div', class_='downloads')[0].li.a['href']
         half = next_soup.find('h2', class_='title').text
-        photo_info.append({'title':half, 'img_url':pic})
+        photo_info.update({half: pic})
         browser.visit(images_url)
 
-    mars_info.update({
-        "i_Title":photo_info[title],
-        "i_URL":photo_info[img_url]
-    })
+        mars_info["images"].update({
+            title:photo_info[title]
+        })
 
-    browser.quit()
+    # browser.quit()
 
 #Fact Table
 
